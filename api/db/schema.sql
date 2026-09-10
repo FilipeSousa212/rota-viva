@@ -1,4 +1,4 @@
-CREATE TABLE leads (
+CREATE TABLE IF NOT EXISTS leads (
   id            BIGSERIAL PRIMARY KEY,
   nome          TEXT NOT NULL,
   email         TEXT NOT NULL,
@@ -16,7 +16,7 @@ CREATE TABLE leads (
 );
 
 -- estado das conversas do WhatsApp
-CREATE TABLE conversas (
+CREATE TABLE IF NOT EXISTS conversas (
   telefone    TEXT PRIMARY KEY,
   etapa       TEXT NOT NULL DEFAULT 'inicio',
   contexto    JSONB NOT NULL DEFAULT '{}',

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Painel de leads — Rota Viva</title>
+  <title>Painel Rota Viva</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Sans:wght@400;500;600&display=swap" />
@@ -16,16 +16,28 @@
       --mono: "IBM Plex Mono", Consolas, monospace;
     }
     * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
     body { margin: 0; background: var(--fundo); color: var(--tinta); font-family: var(--corpo); font-size: 15px; }
+    :where(input, select, button):focus-visible { outline: 3px solid var(--mar); outline-offset: 2px; }
 
-    .topo { display: flex; align-items: baseline; gap: .6rem; background: var(--tinta); color: var(--papel); padding: 1rem 1.5rem; }
+    .topo { display: flex; align-items: baseline; gap: .8rem; flex-wrap: wrap; background: var(--tinta); color: var(--papel); padding: 1rem 1.5rem; }
     .topo h1 { font-family: var(--display); font-size: 1.15rem; margin: 0; }
-    .topo span { font-family: var(--mono); font-size: .68rem; letter-spacing: .2em; text-transform: uppercase; color: var(--ambar); }
+    .topo .conta { font-family: var(--mono); font-size: .7rem; letter-spacing: .08em; color: var(--ambar); }
     .topo .atualizado { margin-left: auto; font-family: var(--mono); font-size: .7rem; color: rgba(250,247,240,.65); }
 
-    main { max-width: 1180px; margin: 0 auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
+    .abas { display: flex; gap: .25rem; max-width: 1180px; margin: 1.1rem auto 0; padding: 0 1.5rem; border-bottom: 1px solid var(--linha); }
+    .aba {
+      font-family: var(--corpo); font-size: .92rem; font-weight: 600; cursor: pointer;
+      background: none; border: 0; border-bottom: 3px solid transparent; margin-bottom: -1px;
+      padding: .7rem 1rem; color: var(--grafite);
+    }
+    .aba:hover { color: var(--tinta); }
+    .aba[aria-selected="true"] { color: var(--tinta); border-bottom-color: var(--carimbo); }
 
-    .resumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .9rem; }
+    main { max-width: 1180px; margin: 0 auto; padding: 1.25rem 1.5rem 2rem; }
+    section[role="tabpanel"] { display: flex; flex-direction: column; gap: 1.1rem; }
+
+    .resumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .9rem; margin: 0; }
     .tile { background: var(--papel); border: 1px solid var(--linha); border-radius: 12px; padding: .9rem 1.1rem; }
     .tile dt { font-family: var(--mono); font-size: .64rem; text-transform: uppercase; letter-spacing: .14em; color: var(--grafite); }
     .tile dd { margin: .3rem 0 0; font-family: var(--mono); font-size: 1.85rem; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1; }
@@ -39,14 +51,12 @@
     .barra input { flex: 1 1 240px; }
     .barra button {
       font-family: var(--corpo); font-size: .88rem; font-weight: 600; cursor: pointer;
-      padding: .55rem 1.1rem; border-radius: 8px; border: 1px solid var(--tinta);
-      background: #fff; color: var(--tinta);
+      padding: .55rem 1.1rem; border-radius: 8px; border: 1px solid var(--tinta); background: #fff; color: var(--tinta);
     }
     .barra button.principal { background: var(--tinta); color: var(--papel); }
-    :where(input, select, button):focus-visible { outline: 3px solid var(--mar); outline-offset: 2px; }
 
     .quadro { background: var(--papel); border: 1px solid var(--linha); border-radius: 12px; overflow-x: auto; }
-    table { border-collapse: collapse; width: 100%; min-width: 900px; }
+    table { border-collapse: collapse; width: 100%; min-width: 960px; }
     thead th {
       text-align: left; font-family: var(--mono); font-size: .64rem; font-weight: 500;
       text-transform: uppercase; letter-spacing: .13em; color: var(--grafite);
@@ -58,111 +68,196 @@
     .num { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
     .nome { font-weight: 600; }
     .secundario { display: block; color: var(--grafite); font-size: .8rem; }
+    .duvida { max-width: 30ch; color: var(--tinta-fraca); font-size: .85rem; }
 
     .etiqueta { font-family: var(--mono); font-size: .62rem; text-transform: uppercase; letter-spacing: .12em; padding: .2rem .5rem; border-radius: 999px; white-space: nowrap; }
     .praia    { background: rgba(31,122,114,.13);  color: var(--mar); }
     .campo    { background: rgba(224,162,57,.2);   color: #8a5e17; }
     .exterior { background: rgba(184,64,44,.13);   color: var(--carimbo); }
 
+    .chip { font-family: var(--mono); font-size: .66rem; font-weight: 600; padding: .2rem .55rem; border-radius: 999px; white-space: nowrap; }
+    .chip-robo   { background: rgba(31,122,114,.13); color: var(--mar); }
+    .chip-humano { background: rgba(184,64,44,.14); color: var(--carimbo); }
+    .tag-teste {
+      margin-left: .45rem; font-family: var(--mono); font-size: .58rem; text-transform: uppercase; letter-spacing: .1em;
+      border: 1px solid var(--linha); color: var(--grafite); border-radius: 4px; padding: .05rem .3rem;
+    }
+
     .zap { color: var(--mar); font-weight: 600; text-decoration: none; }
     .zap:hover { text-decoration: underline; }
 
-    .vazio { padding: 3rem 1rem; text-align: center; color: var(--grafite); }
-    .rodape-nota { font-size: .78rem; color: var(--grafite); }
+    .vazio { padding: 3rem 1rem; text-align: center; color: var(--grafite); margin: 0; }
+    .rodape-nota { font-size: .78rem; color: var(--grafite); margin: 1.2rem 0 0; }
   </style>
 </head>
 <body>
   <header class="topo">
-    <h1>Painel de leads</h1>
-    <span>Rota Viva</span>
+    <h1>Painel Rota Viva</h1>
+    <span class="conta" id="conta"></span>
     <span class="atualizado" id="atualizado">carregando…</span>
   </header>
 
+  <nav class="abas" role="tablist" aria-label="Dados">
+    <button class="aba" role="tab" id="aba-leads" aria-controls="painel-leads" aria-selected="true" type="button">Leads do site</button>
+    <button class="aba" role="tab" id="aba-conversas" aria-controls="painel-conversas" aria-selected="false" type="button">Conversas do WhatsApp</button>
+  </nav>
+
   <main>
-    <dl class="resumo" id="resumo"></dl>
+    <section id="painel-leads" role="tabpanel" aria-labelledby="aba-leads">
+      <dl class="resumo" id="resumo-leads"></dl>
+      <div class="barra">
+        <input id="busca-leads" type="search" placeholder="Buscar por nome, telefone ou e-mail…" />
+        <select id="filtro-leads">
+          <option value="">Todos os destinos</option>
+          <option value="praia">Praia</option>
+          <option value="campo">Campo / Serra</option>
+          <option value="exterior">Exterior</option>
+        </select>
+        <button class="principal" id="atualizar-leads" type="button">Atualizar</button>
+        <button id="csv-leads" type="button">Baixar CSV</button>
+      </div>
+      <div class="quadro">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>Cliente</th><th>Contato</th><th>Destino</th>
+              <th>Período</th><th>Pessoas</th><th>Preferências</th><th>Consentimento</th><th>Recebido</th>
+            </tr>
+          </thead>
+          <tbody id="corpo-leads"></tbody>
+        </table>
+        <p class="vazio" id="vazio-leads" hidden>Nenhum lead encontrado com esse filtro.</p>
+      </div>
+    </section>
 
-    <div class="barra">
-      <input id="busca" type="search" placeholder="Buscar por nome, telefone ou e-mail…" />
-      <select id="filtro">
-        <option value="">Todos os destinos</option>
-        <option value="praia">Praia</option>
-        <option value="campo">Campo / Serra</option>
-        <option value="exterior">Exterior</option>
-      </select>
-      <button class="principal" id="atualizar">Atualizar</button>
-      <button id="csv">Baixar CSV</button>
-    </div>
-
-    <div class="quadro">
-      <table>
-        <thead>
-          <tr>
-            <th>#</th><th>Cliente</th><th>Contato</th><th>Destino</th>
-            <th>Período</th><th>Pessoas</th><th>Preferências</th><th>Consentimento</th><th>Recebido</th>
-          </tr>
-        </thead>
-        <tbody id="corpo"></tbody>
-      </table>
-      <p class="vazio" id="vazio" hidden>Nenhum lead encontrado com esse filtro.</p>
-    </div>
+    <section id="painel-conversas" role="tabpanel" aria-labelledby="aba-conversas" hidden>
+      <dl class="resumo" id="resumo-conversas"></dl>
+      <div class="barra">
+        <input id="busca-conversas" type="search" inputmode="numeric" placeholder="Buscar por telefone…" />
+        <button class="principal" id="atualizar-conversas" type="button">Atualizar</button>
+        <button id="csv-conversas" type="button">Baixar CSV</button>
+      </div>
+      <div class="quadro">
+        <table>
+          <thead>
+            <tr>
+              <th>Telefone</th><th>Etapa</th><th>Quem atende</th><th>Destino</th>
+              <th>Datas e pessoas</th><th>Reserva</th><th>Última dúvida</th><th>Consentimento</th><th>Última mensagem</th>
+            </tr>
+          </thead>
+          <tbody id="corpo-conversas"></tbody>
+        </table>
+        <p class="vazio" id="vazio-conversas" hidden>Nenhuma conversa ainda. Faça um teste na tela de demonstração e clique em Atualizar.</p>
+      </div>
+    </section>
 
     <p class="rodape-nota">
-      Mostra os 300 leads mais recentes. Os dados de consentimento são a sua prova de conformidade com a LGPD — não apague.
+      Mostra os 300 registros mais recentes. O painel é só de leitura: nada aqui altera ou apaga dados.
+      Números marcados como “teste” vêm da tela de demonstração.
     </p>
   </main>
 
   <script>
-    const corpo = document.getElementById('corpo');
-    const vazio = document.getElementById('vazio');
-    const resumo = document.getElementById('resumo');
-    let ultimos = [];
-
+    const $ = (id) => document.getElementById(id);
     const dataBR = (iso) => iso ? new Date(iso).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '—';
     const dataHora = (iso) => iso ? new Date(iso).toLocaleString('pt-BR') : '—';
-    const soDigitos = (t) => String(t).replace(/\D/g, '');
+    const soDigitos = (t) => String(t ?? '').replace(/\D/g, '');
+    const dados = { leads: [], conversas: [] };
 
-    function celula(pai, texto, classe) {
+    const ETAPAS = {
+      inicio: 'Saudação', lgpd: 'Aguardando consentimento', encerrado: 'Recusou o consentimento',
+      menu: 'Menu principal', auth: 'Confirmando CPF', destino: 'Escolhendo destino',
+      datas: 'Informando datas', duvidas: 'Tirando dúvidas', humano: 'Com consultor',
+    };
+
+    // textContent em tudo: nada que veio do formulário ou do WhatsApp é interpretado como HTML.
+    function celula(tr, texto, classe) {
       const td = document.createElement('td');
       if (classe) td.className = classe;
-      td.textContent = texto;      // textContent evita qualquer HTML injetado
-      pai.appendChild(td);
+      td.textContent = texto;
+      tr.appendChild(td);
       return td;
     }
 
-    function pintarResumo(r) {
-      const tiles = [
-        ['Total de leads', r.total, true],
-        ['Hoje', r.hoje, false],
-        ['Últimos 7 dias', r.semana, false],
-        ['Praia', r.praia, false],
-        ['Campo', r.campo, false],
-        ['Exterior', r.exterior, false],
-      ];
-      resumo.innerHTML = '';
-      for (const [rotulo, valor, destaque] of tiles) {
+    function etiqueta(tipo) {
+      const td = document.createElement('td');
+      if (!tipo) { td.textContent = '—'; return td; }
+      const s = document.createElement('span');
+      s.className = 'etiqueta ' + tipo;
+      s.textContent = tipo;
+      td.appendChild(s);
+      return td;
+    }
+
+    function pintarResumo(dl, lista) {
+      dl.innerHTML = '';
+      lista.forEach(([rotulo, valor], i) => {
         const div = document.createElement('div');
-        div.className = 'tile' + (destaque ? ' destaque' : '');
+        div.className = 'tile' + (i === 0 ? ' destaque' : '');
         const dt = document.createElement('dt'); dt.textContent = rotulo;
         const dd = document.createElement('dd'); dd.textContent = valor ?? 0;
         div.append(dt, dd);
-        resumo.appendChild(div);
-      }
+        dl.appendChild(div);
+      });
     }
 
-    function pintarTabela(leads) {
+    function formatarTelefone(t) {
+      const d = soDigitos(t);
+      return d.length === 13 ? `+${d.slice(0, 2)} (${d.slice(2, 4)}) ${d.slice(4, 9)}-${d.slice(9)}` : d;
+    }
+
+    async function buscar(url) {
+      const r = await fetch(url, { credentials: 'same-origin' });
+      if (r.status === 401) throw new Error('Sessão expirada. Recarregue a página e informe a senha.');
+      if (!r.ok) throw new Error('O servidor respondeu ' + r.status + '. Tente de novo em instantes.');
+      return r.json();
+    }
+
+    function falhar(qual, mensagem) {
+      $('corpo-' + qual).innerHTML = '';
+      const vazio = $('vazio-' + qual);
+      vazio.hidden = false;
+      vazio.textContent = mensagem;
+      $('atualizado').textContent = 'falha ao carregar';
+    }
+
+    const marcarAtualizado = () => { $('atualizado').textContent = 'atualizado ' + new Date().toLocaleTimeString('pt-BR'); };
+
+    /* ---------- Leads do site ---------- */
+
+    async function carregarLeads() {
+      const p = new URLSearchParams();
+      const q = $('busca-leads').value.trim();
+      const tipo = $('filtro-leads').value;
+      if (q) p.set('q', q);
+      if (tipo) p.set('tipo', tipo);
+      try {
+        const d = await buscar('/admin/leads?' + p);
+        dados.leads = d.leads;
+        const r = d.resumo;
+        pintarResumo($('resumo-leads'), [
+          ['Total de leads', r.total], ['Hoje', r.hoje], ['Últimos 7 dias', r.semana],
+          ['Praia', r.praia], ['Campo', r.campo], ['Exterior', r.exterior],
+        ]);
+        pintarLeads(d.leads);
+        marcarAtualizado();
+      } catch (e) { falhar('leads', e.message); }
+    }
+
+    function pintarLeads(leads) {
+      const corpo = $('corpo-leads');
       corpo.innerHTML = '';
+      const vazio = $('vazio-leads');
+      vazio.textContent = 'Nenhum lead encontrado com esse filtro.';
       vazio.hidden = leads.length > 0;
 
       for (const l of leads) {
         const tr = document.createElement('tr');
-
         celula(tr, l.id, 'num');
 
         const tdNome = celula(tr, '');
-        const nome = document.createElement('span');
-        nome.className = 'nome'; nome.textContent = l.nome;
-        const email = document.createElement('span');
-        email.className = 'secundario'; email.textContent = l.email;
+        const nome = document.createElement('span'); nome.className = 'nome'; nome.textContent = l.nome;
+        const email = document.createElement('span'); email.className = 'secundario'; email.textContent = l.email;
         tdNome.append(nome, email);
 
         const tdContato = document.createElement('td');
@@ -174,80 +269,117 @@
         tdContato.appendChild(link);
         tr.appendChild(tdContato);
 
-        const tdTipo = document.createElement('td');
-        const et = document.createElement('span');
-        et.className = 'etiqueta ' + l.tipo_destino;
-        et.textContent = l.tipo_destino;
-        tdTipo.appendChild(et);
-        tr.appendChild(tdTipo);
-
+        tr.appendChild(etiqueta(l.tipo_destino));
         celula(tr, dataBR(l.data_ida) + ' → ' + dataBR(l.data_volta), 'num');
         celula(tr, l.adultos + ' ad' + (l.criancas ? ' · ' + l.criancas + ' cr' : ''), 'num');
-
         const prefs = Object.entries(l.preferencias || {}).map(([k, v]) => k + ': ' + v).join(' · ');
         celula(tr, prefs || '—');
-
         celula(tr, l.consentimento ? 'sim · ' + dataHora(l.consent_em) : 'NÃO', 'num');
         celula(tr, dataHora(l.criado_em), 'num');
-
         corpo.appendChild(tr);
       }
     }
 
-    async function carregar() {
-      const params = new URLSearchParams();
-      const q = document.getElementById('busca').value.trim();
-      const tipo = document.getElementById('filtro').value;
-      if (q) params.set('q', q);
-      if (tipo) params.set('tipo', tipo);
+    /* ---------- Conversas do WhatsApp ---------- */
 
-      const aviso = document.getElementById('atualizado');
+    async function carregarConversas() {
+      const q = soDigitos($('busca-conversas').value);
       try {
-        const r = await fetch('/admin/leads?' + params, { credentials: 'same-origin' });
+        const d = await buscar('/admin/conversas' + (q ? '?q=' + q : ''));
+        dados.conversas = d.conversas;
+        const r = d.resumo;
+        pintarResumo($('resumo-conversas'), [
+          ['Conversas', r.total], ['Ativas hoje', r.hoje],
+          ['Com consultor', r.com_consultor], ['Com consentimento', r.com_consentimento],
+        ]);
+        pintarConversas(d.conversas);
+        marcarAtualizado();
+      } catch (e) { falhar('conversas', e.message); }
+    }
 
-        if (r.status === 401) { falhar('Sessão expirada. Recarregue a página e informe a senha.'); return; }
-        if (!r.ok) { falhar('O servidor respondeu ' + r.status + '. Confira o terminal da API.'); return; }
+    function pintarConversas(lista) {
+      const corpo = $('corpo-conversas');
+      corpo.innerHTML = '';
+      const vazio = $('vazio-conversas');
+      vazio.textContent = 'Nenhuma conversa ainda. Faça um teste na tela de demonstração e clique em Atualizar.';
+      vazio.hidden = lista.length > 0;
 
-        const dados = await r.json();
-        ultimos = dados.leads;
-        pintarResumo(dados.resumo);
-        pintarTabela(dados.leads);
-        aviso.textContent = 'atualizado ' + new Date().toLocaleTimeString('pt-BR');
-      } catch (e) {
-        falhar('Não foi possível falar com a API. Ela ainda está rodando?');
-      }
+      for (const c of lista) {
+        const tr = document.createElement('tr');
+        const tdTel = celula(tr, formatarTelefone(c.telefone), 'num');
+        if (c.telefone.startsWith('55000')) {
+          const tag = document.createElement('span');
+          tag.className = 'tag-teste';
+          tag.textContent = 'teste';
+          tdTel.appendChild(tag);
+        }
+        celula(tr, ETAPAS[c.etapa] ?? c.etapa);
 
-      function falhar(mensagem) {
-        corpo.innerHTML = '';
-        vazio.hidden = false;
-        vazio.textContent = mensagem;
-        aviso.textContent = 'falha ao carregar';
+        const tdQuem = document.createElement('td');
+        const chip = document.createElement('span');
+        chip.className = 'chip ' + (c.humano ? 'chip-humano' : 'chip-robo');
+        chip.textContent = c.humano ? 'consultor' : 'robô';
+        tdQuem.appendChild(chip);
+        tr.appendChild(tdQuem);
+
+        tr.appendChild(etiqueta(c.tipo));
+        celula(tr, c.datas ?? '—');
+        celula(tr, c.localizador ?? '—', 'num');
+        celula(tr, c.ultima_duvida ?? '—', 'duvida');
+        celula(tr, c.consentimento_em ? 'sim · ' + dataHora(c.consentimento_em) : 'não', 'num');
+        celula(tr, dataHora(c.atualizado), 'num');
+        corpo.appendChild(tr);
       }
     }
 
-    function baixarCsv() {
-      const cabecalho = ['id','nome','email','telefone','destino','ida','volta','adultos','criancas','preferencias','consentimento','consent_em','criado_em'];
-      const escapar = (v) => '"' + String(v ?? '').replace(/"/g, '""') + '"';
-      const linhas = ultimos.map((l) => [
-        l.id, l.nome, l.email, l.telefone, l.tipo_destino, l.data_ida, l.data_volta,
-        l.adultos, l.criancas, JSON.stringify(l.preferencias), l.consentimento, l.consent_em, l.criado_em,
-      ].map(escapar).join(';'));
+    /* ---------- Exportação ---------- */
 
-      const csv = '﻿' + [cabecalho.join(';'), ...linhas].join('\r\n');
+    function baixarCsv(nome, cabecalho, linhas) {
+      const escapar = (v) => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+      const csv = '﻿' + [cabecalho.join(';'), ...linhas.map((l) => l.map(escapar).join(';'))].join('\r\n');
       const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'leads-' + new Date().toISOString().slice(0, 10) + '.csv';
+      a.download = nome + '-' + new Date().toISOString().slice(0, 10) + '.csv';
       a.click();
       URL.revokeObjectURL(url);
     }
 
-    document.getElementById('atualizar').addEventListener('click', carregar);
-    document.getElementById('filtro').addEventListener('change', carregar);
-    document.getElementById('csv').addEventListener('click', baixarCsv);
-    document.getElementById('busca').addEventListener('keydown', (e) => { if (e.key === 'Enter') carregar(); });
+    $('csv-leads').addEventListener('click', () => baixarCsv('leads',
+      ['id', 'nome', 'email', 'telefone', 'destino', 'ida', 'volta', 'adultos', 'criancas', 'preferencias', 'consentimento', 'consent_em', 'criado_em'],
+      dados.leads.map((l) => [l.id, l.nome, l.email, l.telefone, l.tipo_destino, l.data_ida, l.data_volta,
+        l.adultos, l.criancas, JSON.stringify(l.preferencias), l.consentimento, l.consent_em, l.criado_em])));
 
-    carregar();
+    $('csv-conversas').addEventListener('click', () => baixarCsv('conversas',
+      ['telefone', 'etapa', 'quem_atende', 'destino', 'datas', 'reserva', 'ultima_duvida', 'consentimento_em', 'atualizado'],
+      dados.conversas.map((c) => [c.telefone, ETAPAS[c.etapa] ?? c.etapa, c.humano ? 'consultor' : 'robô',
+        c.tipo, c.datas, c.localizador, c.ultima_duvida, c.consentimento_em, c.atualizado])));
+
+    /* ---------- Abas e ligações ---------- */
+
+    function mostrar(aba) {
+      const conversas = aba === 'conversas';
+      $('aba-leads').setAttribute('aria-selected', String(!conversas));
+      $('aba-conversas').setAttribute('aria-selected', String(conversas));
+      $('painel-leads').hidden = conversas;
+      $('painel-conversas').hidden = !conversas;
+      history.replaceState(null, '', conversas ? '#conversas' : '#leads');
+      (conversas ? carregarConversas : carregarLeads)();
+    }
+
+    $('aba-leads').addEventListener('click', () => mostrar('leads'));
+    $('aba-conversas').addEventListener('click', () => mostrar('conversas'));
+    $('atualizar-leads').addEventListener('click', carregarLeads);
+    $('filtro-leads').addEventListener('change', carregarLeads);
+    $('busca-leads').addEventListener('keydown', (e) => { if (e.key === 'Enter') carregarLeads(); });
+    $('atualizar-conversas').addEventListener('click', carregarConversas);
+    $('busca-conversas').addEventListener('keydown', (e) => { if (e.key === 'Enter') carregarConversas(); });
+
+    buscar('/admin/eu')
+      .then((c) => { $('conta').textContent = 'entrou como ' + c.usuario + ' · ' + c.papel; })
+      .catch(() => {});
+
+    mostrar(location.hash === '#conversas' ? 'conversas' : 'leads');
   </script>
 </body>
 </html>

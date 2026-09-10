@@ -1,0 +1,40 @@
+# Hospedagem no Render (render.com → New → Blueprint → escolher este repositório).
+# Sobe a API — que também serve o site — e um Postgres que só ela consegue acessar.
+
+services:
+  - type: web
+    name: rota-viva-demo
+    runtime: node
+    rootDir: api
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /saude
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: rota-viva-db
+          property: connectionString
+      - key: MODO_DEMO
+        value: "1"
+      - key: TRUST_PROXY
+        value: "3"   # no Render o pedido passa por Cloudflare + 2 balanceadores antes da API
+      - key: RECAPTCHA_DESATIVADO
+        value: "1"
+      - key: ADMIN_USER
+        value: rotaviva
+      - key: ADMIN_PASS
+        generateValue: true
+      - key: CLIENTE_USER
+        value: cliente
+      - key: CLIENTE_PASS
+        generateValue: true
+
+databases:
+  - name: rota-viva-db
+    plan: free
+    databaseName: agencia
+    user: agencia
+    ipAllowList: []   # nenhum acesso de fora: só a API conversa com o banco

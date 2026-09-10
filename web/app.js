@@ -1,4 +1,4 @@
-const API = 'http://localhost:3000/api/cotacao';
+const API = '/api/cotacao'; // mesmo endereço do site: funciona local e online
 const SITE_KEY = 'SUA_SITE_KEY'; // troque quando criar a chave do reCAPTCHA
 
 // ---------- Carrossel ----------
