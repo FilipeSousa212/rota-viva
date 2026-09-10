@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Painel de leads — Rota Viva</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Sans:wght@400;500;600&display=swap" />
+  <style>
+    :root {
+      --tinta: #14243d; --tinta-fraca: #3d5273; --papel: #faf7f0; --fundo: #f2ece1;
+      --carimbo: #b8402c; --mar: #1f7a72; --ambar: #e0a239; --grafite: #5c6878; --linha: #ddd4c4;
+      --display: "Bricolage Grotesque", system-ui, sans-serif;
+      --corpo: "Instrument Sans", system-ui, sans-serif;
+      --mono: "IBM Plex Mono", Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--fundo); color: var(--tinta); font-family: var(--corpo); font-size: 15px; }
+
+    .topo { display: flex; align-items: baseline; gap: .6rem; background: var(--tinta); color: var(--papel); padding: 1rem 1.5rem; }
+    .topo h1 { font-family: var(--display); font-size: 1.15rem; margin: 0; }
+    .topo span { font-family: var(--mono); font-size: .68rem; letter-spacing: .2em; text-transform: uppercase; color: var(--ambar); }
+    .topo .atualizado { margin-left: auto; font-family: var(--mono); font-size: .7rem; color: rgba(250,247,240,.65); }
+
+    main { max-width: 1180px; margin: 0 auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
+
+    .resumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .9rem; }
+    .tile { background: var(--papel); border: 1px solid var(--linha); border-radius: 12px; padding: .9rem 1.1rem; }
+    .tile dt { font-family: var(--mono); font-size: .64rem; text-transform: uppercase; letter-spacing: .14em; color: var(--grafite); }
+    .tile dd { margin: .3rem 0 0; font-family: var(--mono); font-size: 1.85rem; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1; }
+    .tile.destaque dd { color: var(--carimbo); }
+
+    .barra { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .barra input, .barra select {
+      font-family: var(--corpo); font-size: .92rem; padding: .55rem .7rem;
+      border: 1px solid var(--linha); border-radius: 8px; background: #fff; color: var(--tinta);
+    }
+    .barra input { flex: 1 1 240px; }
+    .barra button {
+      font-family: var(--corpo); font-size: .88rem; font-weight: 600; cursor: pointer;
+      padding: .55rem 1.1rem; border-radius: 8px; border: 1px solid var(--tinta);
+      background: #fff; color: var(--tinta);
+    }
+    .barra button.principal { background: var(--tinta); color: var(--papel); }
+    :where(input, select, button):focus-visible { outline: 3px solid var(--mar); outline-offset: 2px; }
+
+    .quadro { background: var(--papel); border: 1px solid var(--linha); border-radius: 12px; overflow-x: auto; }
+    table { border-collapse: collapse; width: 100%; min-width: 900px; }
+    thead th {
+      text-align: left; font-family: var(--mono); font-size: .64rem; font-weight: 500;
+      text-transform: uppercase; letter-spacing: .13em; color: var(--grafite);
+      padding: .85rem 1rem; border-bottom: 1px solid var(--linha); white-space: nowrap;
+    }
+    tbody td { padding: .8rem 1rem; border-bottom: 1px solid #ece5d9; vertical-align: top; font-size: .9rem; }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: #fffdf8; }
+    .num { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .nome { font-weight: 600; }
+    .secundario { display: block; color: var(--grafite); font-size: .8rem; }
+
+    .etiqueta { font-family: var(--mono); font-size: .62rem; text-transform: uppercase; letter-spacing: .12em; padding: .2rem .5rem; border-radius: 999px; white-space: nowrap; }
+    .praia    { background: rgba(31,122,114,.13);  color: var(--mar); }
+    .campo    { background: rgba(224,162,57,.2);   color: #8a5e17; }
+    .exterior { background: rgba(184,64,44,.13);   color: var(--carimbo); }
+
+    .zap { color: var(--mar); font-weight: 600; text-decoration: none; }
+    .zap:hover { text-decoration: underline; }
+
+    .vazio { padding: 3rem 1rem; text-align: center; color: var(--grafite); }
+    .rodape-nota { font-size: .78rem; color: var(--grafite); }
+  </style>
+</head>
+<body>
+  <header class="topo">
+    <h1>Painel de leads</h1>
+    <span>Rota Viva</span>
+    <span class="atualizado" id="atualizado">carregando…</span>
+  </header>
+
+  <main>
+    <dl class="resumo" id="resumo"></dl>
+
+    <div class="barra">
+      <input id="busca" type="search" placeholder="Buscar por nome, telefone ou e-mail…" />
+      <select id="filtro">
+        <option value="">Todos os destinos</option>
+        <option value="praia">Praia</option>
+        <option value="campo">Campo / Serra</option>
+        <option value="exterior">Exterior</option>
+      </select>
+      <button class="principal" id="atualizar">Atualizar</button>
+      <button id="csv">Baixar CSV</button>
+    </div>
+
+    <div class="quadro">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th><th>Cliente</th><th>Contato</th><th>Destino</th>
+            <th>Período</th><th>Pessoas</th><th>Preferências</th><th>Consentimento</th><th>Recebido</th>
+          </tr>
+        </thead>
+        <tbody id="corpo"></tbody>
+      </table>
+      <p class="vazio" id="vazio" hidden>Nenhum lead encontrado com esse filtro.</p>
+    </div>
+
+    <p class="rodape-nota">
+      Mostra os 300 leads mais recentes. Os dados de consentimento são a sua prova de conformidade com a LGPD — não apague.
+    </p>
+  </main>
+
+  <script>
+    const corpo = document.getElementById('corpo');
+    const vazio = document.getElementById('vazio');
+    const resumo = document.getElementById('resumo');
+    let ultimos = [];
+
+    const dataBR = (iso) => iso ? new Date(iso).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '—';
+    const dataHora = (iso) => iso ? new Date(iso).toLocaleString('pt-BR') : '—';
+    const soDigitos = (t) => String(t).replace(/\D/g, '');
+
+    function celula(pai, texto, classe) {
+      const td = document.createElement('td');
+      if (classe) td.className = classe;
+      td.textContent = texto;      // textContent evita qualquer HTML injetado
+      pai.appendChild(td);
+      return td;
+    }
+
+    function pintarResumo(r) {
+      const tiles = [
+        ['Total de leads', r.total, true],
+        ['Hoje', r.hoje, false],
+        ['Últimos 7 dias', r.semana, false],
+        ['Praia', r.praia, false],
+        ['Campo', r.campo, false],
+        ['Exterior', r.exterior, false],
+      ];
+      resumo.innerHTML = '';
+      for (const [rotulo, valor, destaque] of tiles) {
+        const div = document.createElement('div');
+        div.className = 'tile' + (destaque ? ' destaque' : '');
+        const dt = document.createElement('dt'); dt.textContent = rotulo;
+        const dd = document.createElement('dd'); dd.textContent = valor ?? 0;
+        div.append(dt, dd);
+        resumo.appendChild(div);
+      }
+    }
+
+    function pintarTabela(leads) {
+      corpo.innerHTML = '';
+      vazio.hidden = leads.length > 0;
+
+      for (const l of leads) {
+        const tr = document.createElement('tr');
+
+        celula(tr, l.id, 'num');
+
+        const tdNome = celula(tr, '');
+        const nome = document.createElement('span');
+        nome.className = 'nome'; nome.textContent = l.nome;
+        const email = document.createElement('span');
+        email.className = 'secundario'; email.textContent = l.email;
+        tdNome.append(nome, email);
+
+        const tdContato = document.createElement('td');
+        const link = document.createElement('a');
+        link.className = 'zap';
+        link.href = 'https://wa.me/55' + soDigitos(l.telefone);
+        link.target = '_blank'; link.rel = 'noopener';
+        link.textContent = l.telefone;
+        tdContato.appendChild(link);
+        tr.appendChild(tdContato);
+
+        const tdTipo = document.createElement('td');
+        const et = document.createElement('span');
+        et.className = 'etiqueta ' + l.tipo_destino;
+        et.textContent = l.tipo_destino;
+        tdTipo.appendChild(et);
+        tr.appendChild(tdTipo);
+
+        celula(tr, dataBR(l.data_ida) + ' → ' + dataBR(l.data_volta), 'num');
+        celula(tr, l.adultos + ' ad' + (l.criancas ? ' · ' + l.criancas + ' cr' : ''), 'num');
+
+        const prefs = Object.entries(l.preferencias || {}).map(([k, v]) => k + ': ' + v).join(' · ');
+        celula(tr, prefs || '—');
+
+        celula(tr, l.consentimento ? 'sim · ' + dataHora(l.consent_em) : 'NÃO', 'num');
+        celula(tr, dataHora(l.criado_em), 'num');
+
+        corpo.appendChild(tr);
+      }
+    }
+
+    async function carregar() {
+      const params = new URLSearchParams();
+      const q = document.getElementById('busca').value.trim();
+      const tipo = document.getElementById('filtro').value;
+      if (q) params.set('q', q);
+      if (tipo) params.set('tipo', tipo);
+
+      const aviso = document.getElementById('atualizado');
+      try {
+        const r = await fetch('/admin/leads?' + params, { credentials: 'same-origin' });
+
+        if (r.status === 401) { falhar('Sessão expirada. Recarregue a página e informe a senha.'); return; }
+        if (!r.ok) { falhar('O servidor respondeu ' + r.status + '. Confira o terminal da API.'); return; }
+
+        const dados = await r.json();
+        ultimos = dados.leads;
+        pintarResumo(dados.resumo);
+        pintarTabela(dados.leads);
+        aviso.textContent = 'atualizado ' + new Date().toLocaleTimeString('pt-BR');
+      } catch (e) {
+        falhar('Não foi possível falar com a API. Ela ainda está rodando?');
+      }
+
+      function falhar(mensagem) {
+        corpo.innerHTML = '';
+        vazio.hidden = false;
+        vazio.textContent = mensagem;
+        aviso.textContent = 'falha ao carregar';
+      }
+    }
+
+    function baixarCsv() {
+      const cabecalho = ['id','nome','email','telefone','destino','ida','volta','adultos','criancas','preferencias','consentimento','consent_em','criado_em'];
+      const escapar = (v) => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+      const linhas = ultimos.map((l) => [
+        l.id, l.nome, l.email, l.telefone, l.tipo_destino, l.data_ida, l.data_volta,
+        l.adultos, l.criancas, JSON.stringify(l.preferencias), l.consentimento, l.consent_em, l.criado_em,
+      ].map(escapar).join(';'));
+
+      const csv = '﻿' + [cabecalho.join(';'), ...linhas].join('\r\n');
+      const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'leads-' + new Date().toISOString().slice(0, 10) + '.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    document.getElementById('atualizar').addEventListener('click', carregar);
+    document.getElementById('filtro').addEventListener('change', carregar);
+    document.getElementById('csv').addEventListener('click', baixarCsv);
+    document.getElementById('busca').addEventListener('keydown', (e) => { if (e.key === 'Enter') carregar(); });
+
+    carregar();
+  </script>
+</body>
+</html>

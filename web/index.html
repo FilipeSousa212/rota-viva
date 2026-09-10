@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rota Viva Viagens</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Sans:wght@400;500;600&display=swap" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://www.google.com/recaptcha/api.js?render=SUA_SITE_KEY" defer></script>
+</head>
+<body>
+  <header class="topo">
+    <a class="marca" href="#">
+      <span class="marca-nome">Rota Viva</span>
+      <span class="marca-sub">viagens</span>
+    </a>
+    <nav class="menu">
+      <a href="#destinos">Destinos</a>
+      <a href="#cotacao">Cotação</a>
+    </nav>
+    <a class="btn-zap" href="https://wa.me/5511999999999?text=Ol%C3%A1!%20Quero%20uma%20cota%C3%A7%C3%A3o">
+      Falar no WhatsApp
+    </a>
+  </header>
+
+  <!-- HERÓI: BILHETE -->
+  <section class="hero">
+    <div class="bilhete">
+      <div class="bilhete-corpo">
+        <p class="eixo">GRU <span aria-hidden="true">&rarr;</span> o mundo</p>
+        <h1>Sua próxima viagem começa com uma conversa de dois minutos.</h1>
+        <p class="lead">
+          Você conta para onde quer ir, a gente monta o roteiro, negocia a tarifa
+          e acompanha do embarque ao retorno. Sem robô empurrando pacote pronto.
+        </p>
+        <div class="acoes">
+          <a class="btn-primario" href="#cotacao">Fazer minha cotação</a>
+          <a class="btn-secundario" href="#destinos">Ver destinos</a>
+        </div>
+        <ul class="provas">
+          <li><strong>CADASTUR</strong> 26.123456.10-4</li>
+          <li><strong>12 anos</strong> emitindo bilhetes</li>
+          <li><strong>1 hora</strong> para responder</li>
+        </ul>
+      </div>
+
+      <div class="bilhete-talao">
+        <span class="carimbo" aria-hidden="true">cotação<br />sem custo</span>
+        <dl class="dados">
+          <div><dt>Passageiro</dt><dd>a definir</dd></div>
+          <div><dt>Destino</dt><dd>você escolhe</dd></div>
+          <div><dt>Embarque</dt><dd>quando quiser</dd></div>
+          <div><dt>Bagagem</dt><dd>incluída</dd></div>
+        </dl>
+        <p class="serial">RV·2026·BR — 0000 0000 0000</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CARROSSEL: CARTÕES DE EMBARQUE -->
+  <section class="carrossel" id="destinos" aria-label="Destinos em destaque">
+    <div class="secao-cabeca">
+      <h2>Saindo agora</h2>
+      <p>Quatro roteiros que estamos fechando esta semana.</p>
+    </div>
+
+    <div class="trilho" id="trilho">
+      <article class="slide" data-tipo="praia">
+        <header class="slide-topo">
+          <span class="iata">MCZ</span>
+          <span class="etiqueta etiqueta-praia">praia</span>
+        </header>
+        <h3>Maragogi</h3>
+        <p class="uf">Alagoas, Brasil</p>
+        <dl class="ficha">
+          <div><dt>Duração</dt><dd>7 noites</dd></div>
+          <div><dt>Regime</dt><dd>all inclusive</dd></div>
+          <div><dt>Melhor época</dt><dd>set – mar</dd></div>
+          <div><dt>Média</dt><dd>28 °C</dd></div>
+        </dl>
+        <p class="tarifa"><span>a partir de</span> <b>R$ 3.360</b> <span>por pessoa</span></p>
+      </article>
+
+      <article class="slide" data-tipo="campo">
+        <header class="slide-topo">
+          <span class="iata">CNF</span>
+          <span class="etiqueta etiqueta-campo">campo</span>
+        </header>
+        <h3>Serra da Canastra</h3>
+        <p class="uf">Minas Gerais, Brasil</p>
+        <dl class="ficha">
+          <div><dt>Duração</dt><dd>4 noites</dd></div>
+          <div><dt>Hospedagem</dt><dd>pousada</dd></div>
+          <div><dt>Melhor época</dt><dd>abr – ago</dd></div>
+          <div><dt>Média</dt><dd>19 °C</dd></div>
+        </dl>
+        <p class="tarifa"><span>a partir de</span> <b>R$ 1.560</b> <span>por pessoa</span></p>
+      </article>
+
+      <article class="slide" data-tipo="exterior">
+        <header class="slide-topo">
+          <span class="iata">SCL</span>
+          <span class="etiqueta etiqueta-exterior">exterior</span>
+        </header>
+        <h3>Santiago</h3>
+        <p class="uf">Região Metropolitana, Chile</p>
+        <dl class="ficha">
+          <div><dt>Duração</dt><dd>5 noites</dd></div>
+          <div><dt>Inclui</dt><dd>aéreo + hotel</dd></div>
+          <div><dt>Melhor época</dt><dd>mai – set</dd></div>
+          <div><dt>Voo</dt><dd>4 h 10</dd></div>
+        </dl>
+        <p class="tarifa"><span>a partir de</span> <b>R$ 4.750</b> <span>por pessoa</span></p>
+      </article>
+
+      <article class="slide" data-tipo="praia">
+        <header class="slide-topo">
+          <span class="iata">JJD</span>
+          <span class="etiqueta etiqueta-praia">praia</span>
+        </header>
+        <h3>Jericoacoara</h3>
+        <p class="uf">Ceará, Brasil</p>
+        <dl class="ficha">
+          <div><dt>Duração</dt><dd>6 noites</dd></div>
+          <div><dt>Regime</dt><dd>café da manhã</dd></div>
+          <div><dt>Melhor época</dt><dd>jul – dez</dd></div>
+          <div><dt>Vento</dt><dd>ideal p/ kite</dd></div>
+        </dl>
+        <p class="tarifa"><span>a partir de</span> <b>R$ 2.890</b> <span>por pessoa</span></p>
+      </article>
+    </div>
+
+    <button class="nav" id="ant" aria-label="Destino anterior">&lsaquo;</button>
+    <button class="nav" id="prox" aria-label="Próximo destino">&rsaquo;</button>
+  </section>
+
+  <!-- FORMULÁRIO: CARTÃO DE SOLICITAÇÃO -->
+  <section class="cotacao" id="cotacao">
+    <div class="secao-cabeca">
+      <h2>Cartão de solicitação</h2>
+      <p>Preencha e um consultor responde no seu WhatsApp em até uma hora.</p>
+    </div>
+
+    <form id="form-cotacao" class="cartao" novalidate>
+      <fieldset class="bloco">
+        <legend><span class="passo">01</span> Quem viaja</legend>
+        <div class="grade">
+          <label class="campo largo">Nome completo
+            <input name="nome" required maxlength="80" placeholder="Maria Souza" />
+          </label>
+          <label class="campo">WhatsApp
+            <input name="telefone" required inputmode="tel" placeholder="(11) 90000-0000" />
+          </label>
+          <label class="campo">E-mail
+            <input name="email" type="email" required placeholder="maria@email.com" />
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset class="bloco">
+        <legend><span class="passo">02</span> Para onde</legend>
+        <div class="grade">
+          <label class="campo largo">Tipo de destino
+            <select name="tipo" id="tipo" required>
+              <option value="">Selecione…</option>
+              <option value="praia">Praia</option>
+              <option value="campo">Campo / Serra</option>
+              <option value="exterior">Exterior</option>
+            </select>
+          </label>
+          <div id="campos-dinamicos" class="largo"></div>
+        </div>
+      </fieldset>
+
+      <fieldset class="bloco">
+        <legend><span class="passo">03</span> Quando e quantos</legend>
+        <div class="grade">
+          <label class="campo">Saída
+            <input type="date" name="dataIda" id="dataIda" required />
+          </label>
+          <label class="campo">Volta
+            <input type="date" name="dataVolta" id="dataVolta" required />
+          </label>
+          <label class="campo">Adultos
+            <input type="number" name="adultos" id="adultos" min="1" value="2" />
+          </label>
+          <label class="campo">Crianças
+            <input type="number" name="criancas" id="criancas" min="0" value="0" />
+          </label>
+        </div>
+      </fieldset>
+
+      <output id="estimativa" class="estimativa">Preencha destino e datas para ver a estimativa</output>
+
+      <label class="consent">
+        <input type="checkbox" name="consentimento" id="consentimento" required />
+        <span>Aceito os termos e autorizo o contato via WhatsApp para receber cotações.</span>
+      </label>
+
+      <button type="submit" id="enviar">Solicitar cotação</button>
+      <p id="feedback" role="status"></p>
+    </form>
+  </section>
+
+  <footer class="rodape">
+    <p><strong>Rota Viva Viagens</strong> · CADASTUR 26.123456.10-4 · São Paulo, SP</p>
+    <p>Seus dados são tratados conforme a LGPD. Encarregado: privacidade@rotaviva.com.br</p>
+  </footer>
+
+  <!-- BANNER LGPD -->
+  <div id="cookies" class="cookies" hidden>
+    <p>Usamos cookies essenciais para o site funcionar e, com seu aceite, cookies de análise.</p>
+    <div class="cookies-botoes">
+      <button id="cookies-essenciais">Só essenciais</button>
+      <button id="cookies-todos">Aceitar todos</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
