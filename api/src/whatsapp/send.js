@@ -12,19 +12,19 @@ function descrever(payload) {
 }
 
 async function enviar(payload) {
-  const token = process.env.WHATSAPP_TOKEN;
-  const phoneId = process.env.WHATSAPP_PHONE_ID;
-
-  // Modo demonstração, ou desenvolvimento sem credenciais: nada sai para o WhatsApp.
-  // A mensagem só é registrada no console (e na tela /demo). Em produção, falta de credencial é erro.
-  if (modoDemo() || !token || !phoneId) {
-    if (!modoDemo() && process.env.NODE_ENV === 'production') {
-      throw new Error('WHATSAPP_TOKEN/WHATSAPP_PHONE_ID ausentes');
-    }
+  // Demonstração: nada sai para o WhatsApp. A mensagem vai para a tela /demo e o console.
+  if (modoDemo()) {
     const item = descrever(payload);
     registrar(payload.to, item);
     const botoes = item.botoes ? ` [${item.botoes.map((b) => b.titulo).join(' | ')}]` : '';
-    console.log(`📤 [simulado] ${payload.to} ← ${item.texto.replace(/\n/g, ' ⏎ ')}${botoes}`);
+    console.log(`📤 [demo] ${payload.to} ← ${item.texto.replace(/\n/g, ' ⏎ ')}${botoes}`);
+    return;
+  }
+
+  const token = process.env.WHATSAPP_TOKEN;
+  const phoneId = process.env.WHATSAPP_PHONE_ID;
+  if (!token || !phoneId) {
+    console.error(`✖ WhatsApp não configurado (WHATSAPP_TOKEN/WHATSAPP_PHONE_ID): mensagem para ${payload.to} NÃO enviada.`);
     return;
   }
 

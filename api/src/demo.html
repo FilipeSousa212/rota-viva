@@ -247,8 +247,17 @@
   </div>
 
   <script>
-    // Telefone da reserva fictícia RV7K2M (CPF começando em 123) — permite demonstrar "Já sou cliente".
-    const TELEFONE = '5511900000000';
+    // Cada navegador ganha um telefone fictício próprio (DDD 00, que não existe), para duas
+    // pessoas testando ao mesmo tempo não se atrapalharem. O servidor cria para ele uma
+    // reserva de exemplo com CPF começando em 123 (roteiro "Já sou cliente").
+    const TELEFONE = (() => {
+      const novo = () => '55000' + String(Math.floor(Math.random() * 1e8)).padStart(8, '0');
+      try {
+        let t = sessionStorage.getItem('rv-demo-telefone');
+        if (!t) { t = novo(); sessionStorage.setItem('rv-demo-telefone', t); }
+        return t;
+      } catch { return novo(); }
+    })();
 
     const ETAPAS = [
       { id: 'inicio',  nome: 'Saudação' },

@@ -70,6 +70,16 @@ function notificarEquipe(s, motivo) {
 
 /* ---------------- Reservas ---------------- */
 
+// As falhas de CPF valem por 24 h e não zeram ao voltar para o menu: sem isso,
+// dava para tentar os 3 dígitos (1.000 combinações) indefinidamente.
+function cpfBloqueado(s) {
+  const ate = s.contexto.cpfBloqueadoAte;
+  if (!ate) return false;
+  if (new Date(ate) > new Date()) return true;
+  s.contexto = { ...s.contexto, cpfBloqueadoAte: null, tentativasCpf: 0 }; // o bloqueio venceu
+  return false;
+}
+
 async function buscarReserva(telefone, cpfPrefixo) {
   const { rows } = await pool.query(
     `SELECT localizador, destino, voo, hotel, status,
@@ -172,7 +182,10 @@ export async function processar(msg) {
 
     case 'menu':
       if (botao === 'cliente' || /cliente|reserva/i.test(texto)) {
-        s.contexto = { ...s.contexto, tentativasCpf: 0 };
+        if (cpfBloqueado(s)) {
+          await transbordo(s, 'cpf-bloqueado');
+          break;
+        }
         await enviarTexto(tel, 'Para sua segurança, digite os *3 primeiros números do seu CPF*.');
         s.etapa = 'auth';
       } else if (botao === 'cotacao' || /viajar|cota[cç][aã]o|or[cç]amento|pacote/i.test(texto)) {
@@ -188,7 +201,7 @@ export async function processar(msg) {
       const reserva = digitos.length === 3 ? await buscarReserva(tel, digitos) : null;
 
       if (reserva) {
-        s.contexto = { ...s.contexto, tentativasCpf: 0, localizador: reserva.localizador };
+        s.contexto = { ...s.contexto, tentativasCpf: 0, cpfBloqueadoAte: null, localizador: reserva.localizador };
         await enviarTexto(tel, formatarReserva(reserva));
         await enviarTexto(tel, 'Posso ajudar com mais alguma coisa sobre a viagem? Se preferir, digite *atendente*.');
         s.etapa = 'duvidas';
@@ -198,6 +211,7 @@ export async function processar(msg) {
       const tentativas = (s.contexto.tentativasCpf ?? 0) + 1;
       s.contexto = { ...s.contexto, tentativasCpf: tentativas };
       if (tentativas >= LIMITE_TENTATIVAS_CPF) {
+        s.contexto = { ...s.contexto, cpfBloqueadoAte: new Date(Date.now() + UM_DIA_MS).toISOString() };
         await transbordo(s, 'nao-autenticou');
       } else {
         await enviarTexto(tel, 'Não consegui confirmar. Digite só os *3 primeiros números do seu CPF*, por favor.');

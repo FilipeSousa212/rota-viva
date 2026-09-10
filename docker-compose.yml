@@ -4,6 +4,6 @@ services:
     environment:
       POSTGRES_PASSWORD: senha_local
       POSTGRES_DB: agencia
-    ports: ["5433:5432"]
+    ports: ["127.0.0.1:5433:5432"]   # só este computador acessa o banco
     volumes: ["pgdata:/var/lib/postgresql/data"]
 volumes: { pgdata: {} }

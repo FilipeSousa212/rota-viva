@@ -3,13 +3,18 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-    "scripts": {
-    "dev": "node --watch src/server.js"
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node db/migrar.js && node src/server.js",
+    "migrar": "node db/migrar.js"
+  },
+  "engines": {
+    "node": ">=20"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-    "type": "module",
+  "type": "module",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.124.0",
     "cors": "^2.8.6",

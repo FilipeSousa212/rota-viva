@@ -1,9 +1,10 @@
 export async function verificarRecaptcha(token, ip) {
-  // Sem chave configurada em ambiente local, libera — NUNCA em produção.
+  // Desligar o reCAPTCHA exige pedir explicitamente — nunca acontece por esquecimento.
+  if (process.env.RECAPTCHA_DESATIVADO === '1') return true;
+
   if (!process.env.RECAPTCHA_SECRET) {
-    if (process.env.NODE_ENV === 'production') throw new Error('RECAPTCHA_SECRET ausente em produção');
-    console.warn('⚠️  reCAPTCHA desativado (sem RECAPTCHA_SECRET). Só para desenvolvimento.');
-    return true;
+    console.error('✖ RECAPTCHA_SECRET não configurado: formulário recusado. Para testes, use RECAPTCHA_DESATIVADO=1.');
+    return false;
   }
 
   const r = await fetch('https://www.google.com/recaptcha/api/siteverify', {
@@ -15,5 +16,6 @@ export async function verificarRecaptcha(token, ip) {
   return j.success === true && j.score >= 0.5 && j.action === 'cotacao';
 }
 
+// Remove tags HTML e caracteres de controle (\p{Cc}: quebras de linha, tabulação, nulos…).
 export const limpar = (s) =>
-  String(s).replace(/<[^>]*>/g, '').replace(/[\u0000-\u001F]/g, '').trim();
+  String(s).replace(/<[^>]*>/g, '').replace(/\p{Cc}/gu, '').trim();

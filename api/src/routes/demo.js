@@ -7,7 +7,10 @@ import { processar } from '../whatsapp/flow.js';
 import { esvaziar } from '../whatsapp/caixa.js';
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url));
-const TELEFONE_VALIDO = /^\d{10,15}$/;
+
+// Só telefones fictícios: DDI 55 + DDD 00, que não existe. Assim a demonstração
+// nunca lê nem apaga a conversa ou a reserva de um cliente de verdade.
+const TELEFONE_DEMO = /^55000\d{8}$/;
 
 // Só é montado no server.js quando MODO_DEMO=1.
 export const demo = Router();
@@ -22,7 +25,7 @@ demo.get('/info', (_req, res) => {
 // que a Meta entrega no webhook e passa pelo fluxo real.
 demo.post('/mensagem', async (req, res) => {
   const { telefone, texto, botao } = req.body ?? {};
-  if (!TELEFONE_VALIDO.test(String(telefone))) return res.status(400).json({ erro: 'Telefone inválido' });
+  if (!TELEFONE_DEMO.test(String(telefone))) return res.status(400).json({ erro: 'Telefone de demonstração inválido' });
 
   const id = 'demo.' + crypto.randomUUID();
   const msg = botao
@@ -50,8 +53,23 @@ demo.post('/mensagem', async (req, res) => {
 
 demo.post('/reiniciar', async (req, res) => {
   const { telefone } = req.body ?? {};
-  if (!TELEFONE_VALIDO.test(String(telefone))) return res.status(400).json({ erro: 'Telefone inválido' });
+  if (!TELEFONE_DEMO.test(String(telefone))) return res.status(400).json({ erro: 'Telefone de demonstração inválido' });
+
   await pool.query('DELETE FROM conversas WHERE telefone = $1', [telefone]);
   esvaziar(telefone);
+
+  // Faxina: demonstrações abandonadas há mais de um dia.
+  await pool.query(`DELETE FROM conversas WHERE telefone LIKE '55000%' AND atualizado < now() - interval '1 day'`);
+  await pool.query(`DELETE FROM reservas  WHERE telefone LIKE '55000%' AND criado_em  < now() - interval '1 day'`);
+
+  // Reserva de exemplo deste navegador, para o roteiro "Já sou cliente" (CPF começando em 123).
+  await pool.query(
+    `INSERT INTO reservas (telefone, cpf_prefixo, localizador, destino, data_ida, data_volta, voo, hotel, status)
+     VALUES ($1, '123', $2, 'Maragogi, AL', current_date + 60, current_date + 67,
+             'G3 1452 · GRU 07:40 → MCZ 10:55', 'Salinas Maragogi All Inclusive', 'emitida')
+     ON CONFLICT (localizador) DO NOTHING`,
+    [telefone, 'RV' + telefone.slice(-6)]
+  );
+
   res.json({ ok: true });
 });
