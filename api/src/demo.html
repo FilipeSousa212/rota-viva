@@ -1,0 +1,589 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Atendimento Rota Viva — demonstração</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Sans:wght@400;500;600&display=swap" />
+  <style>
+    :root {
+      --tinta: #14243d; --tinta-fraca: #3d5273; --papel: #faf7f0; --fundo: #f2ece1;
+      --carimbo: #b8402c; --mar: #1f7a72; --ambar: #e0a239; --grafite: #5c6878; --linha: #ddd4c4;
+      --display: "Bricolage Grotesque", system-ui, sans-serif;
+      --corpo: "Instrument Sans", system-ui, sans-serif;
+      --mono: "IBM Plex Mono", Consolas, monospace;
+
+      /* Tons do WhatsApp — a tela do celular precisa parecer o que o cliente vai ver */
+      --zap-topo: #008069; --zap-fundo: #efeae2; --zap-eu: #d9fdd3; --zap-robo: #ffffff;
+      --zap-texto: #111b21; --zap-meta: #667781; --zap-link: #027eb5; --zap-barra: #f0f2f5;
+      --zap-fonte: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; } /* senão o display:flex das classes vence o atributo hidden */
+    body { margin: 0; font-family: var(--corpo); color: var(--tinta); background: var(--tinta); }
+    :where(button, input):focus-visible { outline: 3px solid var(--ambar); outline-offset: 2px; }
+
+    .palco { display: grid; grid-template-columns: minmax(320px, 440px) 1fr; min-height: 100vh; }
+
+    /* ---------------- Painel de quem apresenta ---------------- */
+    .painel {
+      background: var(--papel); padding: 1.75rem 1.6rem 2rem;
+      display: flex; flex-direction: column; gap: 1.6rem; overflow-y: auto; max-height: 100vh;
+    }
+    .selo {
+      align-self: flex-start; margin: 0 0 .8rem; font-family: var(--mono); font-size: .64rem;
+      text-transform: uppercase; letter-spacing: .16em; color: var(--carimbo);
+      border: 1.5px solid var(--carimbo); border-radius: 4px; padding: .2rem .45rem; display: inline-block;
+    }
+    .painel h1 { font-family: var(--display); font-size: 1.55rem; line-height: 1.1; margin: 0; letter-spacing: -.015em; text-wrap: balance; }
+    .painel .sub { margin: .55rem 0 0; color: var(--tinta-fraca); font-size: .9rem; line-height: 1.5; }
+    .painel h2 {
+      margin: 0 0 .7rem; font-family: var(--mono); font-size: .66rem; font-weight: 500;
+      text-transform: uppercase; letter-spacing: .15em; color: var(--grafite);
+    }
+    .painel section { border-top: 1px solid var(--linha); padding-top: 1.2rem; }
+
+    .roteiros { display: grid; gap: .5rem; }
+    .roteiro {
+      text-align: left; font-family: var(--corpo); cursor: pointer; background: #fff;
+      border: 1px solid var(--linha); border-radius: 10px; padding: .7rem .85rem; color: var(--tinta);
+    }
+    .roteiro:hover:not(:disabled) { border-color: var(--tinta-fraca); }
+    .roteiro:disabled { opacity: .5; cursor: default; }
+    .roteiro strong { display: block; font-size: .9rem; }
+    .roteiro span { display: block; font-size: .78rem; color: var(--grafite); margin-top: .1rem; }
+    .acoes-painel { display: flex; gap: .5rem; margin-top: .7rem; }
+    .acoes-painel button {
+      font-family: var(--corpo); font-size: .82rem; font-weight: 600; cursor: pointer;
+      border-radius: 999px; padding: .45rem .95rem; border: 1px solid var(--tinta); background: transparent; color: var(--tinta);
+    }
+    .acoes-painel button:disabled { opacity: .45; cursor: default; }
+
+    /* Trilha do fluxo */
+    .trilha { list-style: none; margin: 0; padding: 0; display: grid; gap: .1rem; }
+    .trilha li {
+      display: flex; align-items: center; gap: .6rem; padding: .38rem .5rem; border-radius: 8px;
+      font-size: .86rem; color: var(--grafite);
+    }
+    .trilha li::before {
+      content: ""; width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto;
+      border: 2px solid var(--linha); background: var(--papel);
+    }
+    .trilha li.visitada { color: var(--tinta); }
+    .trilha li.visitada::before { border-color: var(--mar); background: var(--mar); }
+    .trilha li.atual { background: var(--tinta); color: var(--papel); font-weight: 600; }
+    .trilha li.atual::before { border-color: var(--ambar); background: var(--ambar); }
+    .trilha .ramo {
+      margin-left: auto; font-family: var(--mono); font-size: .6rem; text-transform: uppercase;
+      letter-spacing: .12em; opacity: .7;
+    }
+    .nota-trilha { margin: .5rem 0 0; font-size: .8rem; color: var(--carimbo); min-height: 1em; }
+
+    /* Memória */
+    .memoria { margin: 0; display: grid; gap: .45rem; }
+    .memoria div { display: flex; justify-content: space-between; gap: 1rem; border-bottom: 1px dotted var(--linha); padding-bottom: .35rem; }
+    .memoria dt { font-size: .8rem; color: var(--grafite); }
+    .memoria dd { margin: 0; font-size: .84rem; font-weight: 600; text-align: right; }
+
+    /* Avisos à equipe */
+    .avisos { list-style: none; margin: 0; padding: 0; display: grid; gap: .45rem; }
+    .avisos li {
+      background: #fff; border: 1px solid var(--linha); border-left: 3px solid var(--ambar);
+      border-radius: 8px; padding: .55rem .7rem; font-size: .83rem;
+    }
+    .avisos li.urgente { border-left-color: var(--carimbo); }
+    .avisos li time { display: block; font-family: var(--mono); font-size: .66rem; color: var(--grafite); margin-top: .15rem; }
+    .avisos li.vazio { border-left-color: var(--linha); color: var(--grafite); background: transparent; }
+
+    /* ---------------- Palco com o celular ---------------- */
+    .aparelho {
+      display: flex; align-items: center; justify-content: center; padding: 1.5rem;
+      background:
+        radial-gradient(circle at 70% 20%, rgba(224,162,57,.14), transparent 45%),
+        radial-gradient(circle at 20% 90%, rgba(31,122,114,.22), transparent 50%),
+        var(--tinta);
+    }
+    .tela {
+      width: min(390px, 100%); height: min(800px, calc(100vh - 3rem)); min-height: 560px;
+      border: 11px solid #0a0e16; border-radius: 46px; overflow: hidden;
+      display: flex; flex-direction: column; background: var(--zap-fundo);
+      box-shadow: 0 40px 80px -30px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.06);
+      font-family: var(--zap-fonte); color: var(--zap-texto);
+    }
+    .zap-topo {
+      display: flex; align-items: center; gap: .7rem; padding: 2.1rem 1rem .75rem;
+      background: var(--zap-topo); color: #fff;
+    }
+    .avatar {
+      width: 38px; height: 38px; border-radius: 50%; background: var(--papel); color: var(--tinta);
+      display: grid; place-items: center; font-family: var(--display); font-weight: 800; font-size: .9rem;
+    }
+    .zap-topo strong { display: block; font-size: 1rem; font-weight: 600; }
+    .zap-topo span { display: block; font-size: .78rem; opacity: .85; }
+
+    .conversa {
+      flex: 1; overflow-y: auto; padding: .9rem .7rem 1rem; display: flex; flex-direction: column; gap: .3rem;
+      background-color: var(--zap-fundo);
+      background-image: radial-gradient(rgba(0,0,0,.035) 1px, transparent 1px);
+      background-size: 18px 18px;
+    }
+    .chip-dia {
+      align-self: center; font-size: .72rem; color: var(--zap-meta); background: #fff;
+      border-radius: 7px; padding: .3rem .7rem; box-shadow: 0 1px .5px rgba(11,20,26,.13); margin-bottom: .3rem;
+    }
+    .sistema {
+      align-self: center; text-align: center; max-width: 88%; font-size: .74rem; line-height: 1.35;
+      color: #54656f; background: #fff5c4; border-radius: 7px; padding: .4rem .7rem; margin: .2rem 0;
+    }
+
+    .linha { display: flex; flex-direction: column; max-width: 82%; }
+    .linha.eu { align-self: flex-end; align-items: flex-end; }
+    .linha.robo { align-self: flex-start; }
+    .bolha {
+      padding: .38rem .55rem .45rem; border-radius: 8px; font-size: .9rem; line-height: 1.36;
+      box-shadow: 0 1px .5px rgba(11,20,26,.13); white-space: pre-wrap; overflow-wrap: anywhere;
+    }
+    .eu .bolha { background: var(--zap-eu); border-top-right-radius: 2px; }
+    .robo .bolha { background: var(--zap-robo); border-top-left-radius: 2px; }
+    .bolha .rotulo { display: block; font-size: .76rem; font-weight: 600; color: var(--carimbo); margin-bottom: .1rem; }
+    .bolha .meta { float: right; margin: .35rem 0 -.2rem .6rem; font-size: .66rem; color: var(--zap-meta); }
+    .eu .meta::after { content: " ✓✓"; color: #53bdeb; letter-spacing: -.12em; }
+
+    .botoes { display: grid; gap: 2px; margin-top: 2px; }
+    .botoes button {
+      font-family: var(--zap-fonte); font-size: .88rem; font-weight: 500; color: var(--zap-link);
+      background: var(--zap-robo); border: 0; border-radius: 8px; padding: .55rem .8rem; cursor: pointer;
+      box-shadow: 0 1px .5px rgba(11,20,26,.13);
+    }
+    .botoes button:hover:not(:disabled) { background: #f5f6f6; }
+    .botoes button:disabled { color: #8696a0; cursor: default; }
+
+    .consultor { display: flex; gap: .4rem; padding: .5rem .6rem; background: #fff8e6; border-top: 1px solid #f1dfb1; }
+    .consultor label { font-size: .7rem; color: #8a5e17; font-weight: 600; align-self: center; white-space: nowrap; }
+    .consultor input { flex: 1; min-width: 0; border: 1px solid #ecd9a6; border-radius: 8px; padding: .45rem .6rem; font: .85rem var(--zap-fonte); }
+    .consultor button { border: 0; border-radius: 8px; background: #8a5e17; color: #fff; font: 600 .8rem var(--zap-fonte); padding: 0 .75rem; cursor: pointer; }
+
+    .zap-entrada { display: flex; gap: .45rem; align-items: center; padding: .5rem .6rem .9rem; background: var(--zap-barra); }
+    .zap-entrada input {
+      flex: 1; min-width: 0; border: 0; border-radius: 22px; padding: .7rem 1rem;
+      font: .92rem var(--zap-fonte); background: #fff; color: var(--zap-texto);
+    }
+    .zap-entrada button {
+      width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--zap-topo); color: #fff;
+      font-size: 1.05rem; cursor: pointer; flex: 0 0 auto;
+    }
+    .zap-entrada :disabled { opacity: .55; cursor: default; }
+
+    @media (max-width: 960px) {
+      .palco { grid-template-columns: 1fr; }
+      .aparelho { order: -1; }
+      .painel { max-height: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="palco">
+    <aside class="painel">
+      <header>
+        <span class="selo">modo demonstração</span>
+        <h1>Atendimento da Rota Viva no WhatsApp</h1>
+        <p class="sub">
+          Esta tela roda o mesmo motor que vai atender os clientes de verdade.
+          Nenhuma mensagem sai deste computador.
+        </p>
+      </header>
+
+      <section>
+        <h2>Roteiros para apresentar</h2>
+        <div class="roteiros" id="roteiros"></div>
+        <div class="acoes-painel">
+          <button id="reiniciar" type="button">Reiniciar conversa</button>
+        </div>
+      </section>
+
+      <section>
+        <h2>Onde a conversa está</h2>
+        <ol class="trilha" id="trilha"></ol>
+        <p class="nota-trilha" id="nota-trilha"></p>
+      </section>
+
+      <section>
+        <h2>O que o sistema guardou</h2>
+        <dl class="memoria" id="memoria"></dl>
+      </section>
+
+      <section>
+        <h2>Avisos para a equipe</h2>
+        <ul class="avisos" id="avisos"></ul>
+      </section>
+    </aside>
+
+    <main class="aparelho">
+      <div class="tela">
+        <header class="zap-topo">
+          <div class="avatar" aria-hidden="true">RV</div>
+          <div>
+            <strong>Rota Viva Viagens</strong>
+            <span id="status">online</span>
+          </div>
+        </header>
+
+        <div class="conversa" id="conversa" aria-live="polite"></div>
+
+        <div class="consultor" id="consultor" hidden>
+          <label for="consultor-texto">Consultor</label>
+          <input id="consultor-texto" autocomplete="off" placeholder="Responder como a equipe…" />
+          <button id="consultor-enviar" type="button">Enviar</button>
+        </div>
+
+        <form class="zap-entrada" id="entrada">
+          <input id="texto" autocomplete="off" placeholder="Mensagem" aria-label="Mensagem" />
+          <button type="submit" aria-label="Enviar">➤</button>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Telefone da reserva fictícia RV7K2M (CPF começando em 123) — permite demonstrar "Já sou cliente".
+    const TELEFONE = '5511900000000';
+
+    const ETAPAS = [
+      { id: 'inicio',  nome: 'Saudação' },
+      { id: 'lgpd',    nome: 'Consentimento LGPD' },
+      { id: 'menu',    nome: 'Menu principal' },
+      { id: 'auth',    nome: 'Confirmação por CPF', ramo: 'cliente' },
+      { id: 'destino', nome: 'Tipo de destino',     ramo: 'cotação' },
+      { id: 'datas',   nome: 'Datas e pessoas',     ramo: 'cotação' },
+      { id: 'duvidas', nome: 'Dúvidas com IA' },
+      { id: 'humano',  nome: 'Consultor humano' },
+    ];
+
+    const ROTEIROS = [
+      {
+        nome: 'Pedido de cotação',
+        desc: 'Consentimento, destino, datas e duas dúvidas',
+        passos: [
+          { texto: 'Oi, boa tarde!' }, { botao: 'lgpd_sim' }, { botao: 'cotacao' }, { botao: 'praia' },
+          { texto: '10 a 17 de dezembro, 2 adultos e 1 criança' },
+          { texto: 'Como é o clima nessa época?' },
+          { texto: 'A criança precisa de algum documento?' },
+        ],
+      },
+      {
+        nome: 'Cliente consultando a reserva',
+        desc: 'Só mostra os dados depois de confirmar o CPF',
+        passos: [
+          { texto: 'Olá' }, { botao: 'lgpd_sim' }, { botao: 'cliente' },
+          { texto: '999' }, { texto: '123' },
+          { texto: 'Preciso levar passaporte?' },
+        ],
+      },
+      {
+        nome: 'Pergunta de preço',
+        desc: 'A IA não inventa valores: passa para o consultor',
+        passos: [
+          { texto: 'Oi' }, { botao: 'lgpd_sim' }, { botao: 'cotacao' }, { botao: 'exterior' },
+          { texto: 'julho, 2 adultos' }, { texto: 'Quanto custa o pacote?' },
+        ],
+      },
+      {
+        nome: 'IA não entende duas vezes',
+        desc: 'Na segunda falha, transfere para um humano',
+        passos: [
+          { texto: 'Oi' }, { botao: 'lgpd_sim' }, { botao: 'cotacao' }, { botao: 'campo' },
+          { texto: 'maio, casal' }, { texto: 'e o jogo ontem?' }, { texto: 'kkkkk' },
+        ],
+      },
+      {
+        nome: 'Cliente pede um atendente',
+        desc: 'Funciona em qualquer ponto da conversa',
+        passos: [{ texto: 'Oi' }, { botao: 'lgpd_sim' }, { texto: 'Quero falar com um atendente' }],
+      },
+      {
+        nome: 'Cliente recusa o consentimento',
+        desc: 'Sem autorização, nenhum dado é coletado',
+        passos: [{ texto: 'Oi' }, { botao: 'lgpd_nao' }],
+      },
+    ];
+
+    const MOTIVOS = {
+      'nova-cotacao':            ['Nova cotação para preparar', false],
+      'cliente-pediu-atendente': ['Cliente pediu um atendente', true],
+      'nao-autenticou':          ['Cliente não confirmou o CPF', true],
+      'assunto-para-consultor':  ['Assunto que só o consultor resolve', true],
+      'ia-nao-entendeu-2x':      ['A IA não entendeu duas vezes', true],
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const conversa = $('conversa');
+    const reduzir = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const esperar = (ms) => new Promise((r) => setTimeout(r, reduzir ? 0 : ms));
+    const hora = () => new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+    let ocupado = false;
+    let rodando = false;
+    let ultimosBotoes = [];
+    let motorIA = 'demo';
+    const visitadas = new Set();
+
+    /* ---------- Chat ---------- */
+
+    // Converte *negrito* do WhatsApp sem nunca interpretar HTML vindo do servidor.
+    function formatar(el, texto) {
+      for (const parte of texto.split(/(\*[^*\n]+\*)/g)) {
+        if (/^\*[^*\n]+\*$/.test(parte)) {
+          const b = document.createElement('strong');
+          b.textContent = parte.slice(1, -1);
+          el.appendChild(b);
+        } else if (parte) {
+          el.appendChild(document.createTextNode(parte));
+        }
+      }
+    }
+
+    function rolar() { conversa.scrollTop = conversa.scrollHeight; }
+
+    function bolha(lado, texto, { rotulo, botoes } = {}) {
+      const linha = document.createElement('div');
+      linha.className = 'linha ' + lado;
+
+      const b = document.createElement('div');
+      b.className = 'bolha';
+      if (rotulo) {
+        const r = document.createElement('span');
+        r.className = 'rotulo';
+        r.textContent = rotulo;
+        b.appendChild(r);
+      }
+      formatar(b, texto);
+      const meta = document.createElement('span');
+      meta.className = 'meta';
+      meta.textContent = hora();
+      b.appendChild(meta);
+      linha.appendChild(b);
+
+      if (botoes?.length) {
+        const grupo = document.createElement('div');
+        grupo.className = 'botoes';
+        for (const bt of botoes) {
+          const x = document.createElement('button');
+          x.type = 'button';
+          x.textContent = bt.titulo;
+          x.addEventListener('click', () => { if (!rodando) enviar({ botao: bt }); });
+          grupo.appendChild(x);
+        }
+        linha.appendChild(grupo);
+      }
+
+      conversa.appendChild(linha);
+      rolar();
+    }
+
+    function sistema(texto, classe = 'sistema') {
+      const p = document.createElement('p');
+      p.className = classe;
+      p.textContent = texto;
+      conversa.appendChild(p);
+      rolar();
+    }
+
+    function travar() {
+      const travado = ocupado || rodando;
+      $('texto').disabled = travado;
+      $('entrada').querySelector('button').disabled = travado;
+      $('reiniciar').disabled = rodando;
+      document.querySelectorAll('.roteiro').forEach((r) => { r.disabled = rodando; });
+    }
+
+    async function enviar({ texto, botao }) {
+      if (ocupado) return;
+      ocupado = true;
+      travar();
+      conversa.querySelectorAll('.botoes button').forEach((b) => { b.disabled = true; });
+      bolha('eu', botao ? botao.titulo : texto);
+
+      try {
+        const r = await fetch('/demo/mensagem', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ telefone: TELEFONE, texto, botao }),
+        });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const { saida, estado } = await r.json();
+
+        for (const item of saida) {
+          if (item.tipo === 'equipe') { registrarAviso(item); continue; }
+          $('status').textContent = 'digitando…';
+          await esperar(500 + Math.min(item.texto.length * 7, 900));
+          $('status').textContent = 'online';
+          bolha('robo', item.texto, { botoes: item.botoes });
+          if (item.botoes) ultimosBotoes = item.botoes;
+        }
+        if (!saida.some((i) => i.tipo !== 'equipe') && estado?.humano) {
+          sistema('O robô ficou em silêncio: a conversa está com um consultor.');
+        }
+        pintarEstado(estado);
+      } catch (e) {
+        sistema('Não consegui falar com o servidor. A API está rodando?');
+      } finally {
+        $('status').textContent = 'online';
+        ocupado = false;
+        travar();
+        if (!rodando) $('texto').focus();
+      }
+    }
+
+    /* ---------- Painel ---------- */
+
+    function pintarTrilha(etapa) {
+      const trilha = $('trilha');
+      trilha.innerHTML = '';
+      const atual = etapa === 'encerrado' ? 'lgpd' : etapa;
+      for (const e of ETAPAS) {
+        const li = document.createElement('li');
+        if (visitadas.has(e.id)) li.classList.add('visitada');
+        if (e.id === atual) li.classList.add('atual');
+        li.appendChild(document.createTextNode(e.nome));
+        if (e.ramo) {
+          const r = document.createElement('span');
+          r.className = 'ramo';
+          r.textContent = e.ramo;
+          li.appendChild(r);
+        }
+        trilha.appendChild(li);
+      }
+      $('nota-trilha').textContent = etapa === 'encerrado'
+        ? 'Cliente recusou o consentimento. Nenhum dado de viagem foi guardado.'
+        : '';
+    }
+
+    function pintarMemoria(estado) {
+      const c = estado?.contexto ?? {};
+      const linhas = [
+        ['Quem atende', estado?.humano ? 'Consultor humano' : 'Robô'],
+        ['Consentimento', c.consentimentoEm ? new Date(c.consentimentoEm).toLocaleString('pt-BR') : '—'],
+        ['Tipo de destino', c.tipo ?? '—'],
+        ['Datas e pessoas', c.datas ?? '—'],
+        ['Reserva localizada', c.localizador ?? '—'],
+        ['Falhas da IA', `${estado?.falhas_ia ?? 0} de 2`],
+        ['Motor de IA', motorIA === 'claude' ? 'Claude (Anthropic)' : 'Respostas de demonstração'],
+      ];
+      const dl = $('memoria');
+      dl.innerHTML = '';
+      for (const [rotulo, valor] of linhas) {
+        const div = document.createElement('div');
+        const dt = document.createElement('dt'); dt.textContent = rotulo;
+        const dd = document.createElement('dd'); dd.textContent = valor;
+        div.append(dt, dd);
+        dl.appendChild(div);
+      }
+    }
+
+    function pintarEstado(estado) {
+      if (estado) {
+        visitadas.add('inicio');
+        visitadas.add(estado.etapa === 'encerrado' ? 'lgpd' : estado.etapa);
+      }
+      pintarTrilha(estado?.etapa ?? null);
+      pintarMemoria(estado);
+      $('consultor').hidden = !estado?.humano;
+    }
+
+    function limparAvisos() {
+      $('avisos').innerHTML = '<li class="vazio">Nenhum aviso ainda.</li>';
+    }
+
+    function registrarAviso(item) {
+      const lista = $('avisos');
+      lista.querySelector('.vazio')?.remove();
+      const motivo = item.motivo.startsWith('ia-indisponivel') ? ['IA indisponível', true] : (MOTIVOS[item.motivo] ?? [item.motivo, false]);
+      const li = document.createElement('li');
+      if (motivo[1]) li.classList.add('urgente');
+      li.textContent = motivo[0];
+      const t = document.createElement('time');
+      t.textContent = hora() + ' · ' + TELEFONE;
+      li.appendChild(t);
+      lista.prepend(li);
+    }
+
+    async function reiniciar() {
+      await fetch('/demo/reiniciar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ telefone: TELEFONE }),
+      });
+      conversa.innerHTML = '';
+      const chip = document.createElement('p');
+      chip.className = 'chip-dia';
+      chip.textContent = 'HOJE';
+      conversa.appendChild(chip);
+      sistema('Demonstração · as mensagens não saem deste computador.');
+      visitadas.clear();
+      ultimosBotoes = [];
+      limparAvisos();
+      pintarEstado(null);
+    }
+
+    async function rodar(roteiro) {
+      if (rodando || ocupado) return;
+      rodando = true;
+      travar();
+      try {
+        await reiniciar();
+        for (const passo of roteiro.passos) {
+          await esperar(850);
+          if (passo.botao) {
+            const bt = ultimosBotoes.find((b) => b.id === passo.botao);
+            if (!bt) break;
+            await enviar({ botao: bt });
+          } else {
+            await enviar({ texto: passo.texto });
+          }
+        }
+      } finally {
+        rodando = false;
+        travar();
+      }
+    }
+
+    /* ---------- Ligações ---------- */
+
+    for (const r of ROTEIROS) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'roteiro';
+      const s = document.createElement('strong'); s.textContent = r.nome;
+      const d = document.createElement('span'); d.textContent = r.desc;
+      b.append(s, d);
+      b.addEventListener('click', () => rodar(r));
+      $('roteiros').appendChild(b);
+    }
+
+    $('entrada').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const texto = $('texto').value.trim();
+      if (!texto || rodando) return;
+      $('texto').value = '';
+      enviar({ texto });
+    });
+
+    $('reiniciar').addEventListener('click', () => { if (!rodando && !ocupado) reiniciar(); });
+
+    function responderComoConsultor() {
+      const campo = $('consultor-texto');
+      const texto = campo.value.trim();
+      if (!texto) return;
+      campo.value = '';
+      bolha('robo', texto, { rotulo: 'Consultor · Rota Viva' });
+    }
+    $('consultor-enviar').addEventListener('click', responderComoConsultor);
+    $('consultor-texto').addEventListener('keydown', (e) => { if (e.key === 'Enter') responderComoConsultor(); });
+
+    fetch('/demo/info').then((r) => r.json()).then((i) => { motorIA = i.ia; pintarMemoria(null); }).catch(() => {});
+    reiniciar();
+  </script>
+</body>
+</html>

@@ -25,6 +25,10 @@
 
 * { box-sizing: border-box; }
 
+/* Sem esta regra, o display:flex do banner de cookies vence o atributo hidden
+   e o banner nunca some depois que a pessoa escolhe. */
+[hidden] { display: none !important; }
+
 body {
   margin: 0;
   background-color: var(--papel-fundo);
